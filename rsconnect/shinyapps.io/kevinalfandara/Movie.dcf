@@ -1,0 +1,14 @@
+name: Movie
+title: Movie
+username:
+account: kevinalfandara
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7466958
+bundleId: 6458282
+url: https://kevinalfandara.shinyapps.io/Movie/
+when: 1667204532.31353
+lastSyncTime: 1667204532.31354
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData
