@@ -7,7 +7,7 @@ shinyServer(function(input, output){
       filter(!is.na(rating)) %>%
       mutate(rating = fct_lump(rating, 5)) %>%
       group_by(rating, type) %>%
-      summarise(Count = n()) %>%
+      summarise(Count = n(),.groups = 'drop') %>%
       arrange(Count) %>%
       plot_ly(
         x = ~ type ,
@@ -22,8 +22,8 @@ shinyServer(function(input, output){
                           categoryarray = ~ Count)) %>%
       layout(
         title = "Rating by Type",
-        yaxis = list(title = "Type"),
-        xaxis = list(title = "Count"),
+        yaxis = list(title = "Count"),
+        xaxis = list(title = "Type"),
         legend = list(title = list(text = '<b> Rating </b>'))
       )
   })
@@ -58,34 +58,34 @@ shinyServer(function(input, output){
   # })
   
   #output plot 1
-  output$plot_bar <- renderPlotly({
-    
-    Movie_vs_TV_Show <-
-      netflix %>%
-      group_by(type) %>%
-      summarise(Total = n())
-    
-    
-    Movie_vs_TV_Show <-
-      Movie_vs_TV_Show %>%
-      mutate(label = glue("Type : {type}
-                        Total  : {comma(Total)}"))
-    
-    
-    plot1 <- ggplot(data = Movie_vs_TV_Show,
-                    mapping = aes(text = label)) +
-      geom_col(mapping = aes(x = type,
-                             y = Total,
-                             fill = type)) +
-      labs(title = "Amount of content per type",
-           x = "Type of content",
-           y = "Amount of content") +
-      theme(legend.position = "none")
-    #theme_minimal()
-    
-    
-    ggplotly(plot1, tooltip = "text")
-  })
+  # output$plot_bar <- renderPlotly({
+  #   
+  #   Movie_vs_TV_Show <-
+  #     netflix %>%
+  #     group_by(type) %>%
+  #     summarise(Total = n())
+  #   
+  #   
+  #   Movie_vs_TV_Show <-
+  #     Movie_vs_TV_Show %>%
+  #     mutate(label = glue("Type : {type}
+  #                       Total  : {comma(Total)}"))
+  #   
+  #   
+  #   plot1 <- ggplot(data = Movie_vs_TV_Show,
+  #                   mapping = aes(text = label)) +
+  #     geom_col(mapping = aes(x = type,
+  #                            y = Total,
+  #                            fill = type)) +
+  #     labs(title = "Amount of content per type",
+  #          x = "Type of content",
+  #          y = "Amount of content") +
+  #     theme(legend.position = "none")
+  #   #theme_minimal()
+  #   
+  #   
+  #   ggplotly(plot1, tooltip = "text")
+  # })
   
   #buat output 2 dashboard Movie
   # output$movie1 <- renderPlotly({
@@ -200,6 +200,109 @@ shinyServer(function(input, output){
   #       xaxis = list(title = "Count")
   #     )
   # })
+  
+  output$plot_scatterplot <- renderPlotly({
+
+    year_start <- input$release_year[1]
+    year_end <- input$release_year[2]
+    
+    type_tvshow <-
+      type_tvshow %>%
+      filter(release_year >= year_start & release_year <= year_end) %>%
+      group_by(release_year,duration) %>%
+      summarise(Count = n(),.groups = 'drop') %>% 
+      arrange(desc(Count)) 
+
+    type_tvshow <-
+      type_tvshow %>%
+      mutate(
+        label = glue("Tahun :{release_year} 
+                     Distribusi : {duration}")
+                          )
+
+    plot2 <- ggplot(data = type_tvshow,
+                    mapping = aes(
+                                  x = release_year,
+                                  y = duration,
+                                  text = label
+                    )) +
+      geom_point(aes(size = release_year),col = "red", alpha = 0.2) +
+      labs(title = glue("TV Show Duration Per Year"),
+           x = "Release Year",
+           y = "Seasons") +
+      theme_minimal()
+    
+    plot2
+    
+    ggplotly(plot2,tooltip="text")
+
+
+  })
+  
+  output$ct1 <- renderPlotly({
+    tvshow_world <- 
+      type_tvshow %>% 
+      filter(type_tvshow$release_year == input$yearbetween) %>%
+      group_by(type) %>% 
+      group_by(country) %>% 
+      filter(!is.na(country)) %>%
+      summarise(num_tvshow_country = n()) %>%
+      slice(1:20)
+    
+    tvshow_world <- 
+      tvshow_world %>% 
+      mutate(label = glue("Country : {country}
+                          Total  : {comma(num_tvshow_country)}"))
+    
+    plot2 <- 
+      ggplot(data = tvshow_world,
+             mapping = aes(text = label,
+                           x = country, 
+                           y = num_tvshow_country, 
+                           fill = country,
+             )) +
+      geom_bar(stat = "identity", 
+               position = "dodge") +
+      coord_flip() +
+      labs(title = "Amount of TV Show Per Country", 
+           x = "", 
+           y = "Number Of Content") +
+      theme_minimal()+
+      theme(legend.position = "none")
+    # scale_x_continuous(labels = comma)
+    
+    ggplotly(plot2, tooltip = "text")
+    
+  })
+  
+  
+  # output$plot_scatterplot <- renderPlotly({ 
+  #   
+  #   year_start <- input$release_year[1]
+  #   year_end <- input$release_year[2]
+  #   
+  #   type_tvshow %>% 
+  #     select(country) %>%
+  #     filter(release_year >= year_start & release_year <= year_end) %>%
+  #     filter(!is.na(country)) %>%
+  #     mutate(country = fct_lump(country, 10)) %>%
+  #     group_by(country) %>%
+  #     summarise(Count = n()) %>%
+  #     arrange(Count) %>%
+  #     plot_ly(
+  #       x = ~ Count ,
+  #       y = ~ country,
+  #       type = "scatter",
+  #       orientation = 'h'
+  #     ) %>%
+  #     layout(yaxis = list(categoryorder = "array", categoryarray = ~ Count)) %>%
+  #     layout(
+  #       title = "Items distribution by Country",
+  #       yaxis = list(title = "Country"),
+  #       xaxis = list(title = "Count")
+  #     )
+  #   })
+  
   
   output$table1 <- DT::renderDataTable({
     

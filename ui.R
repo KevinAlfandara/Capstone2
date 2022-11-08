@@ -21,14 +21,16 @@ dashboardPage(
                tabName = "tab_overview", 
                icon = icon("dashboard"
                )),
-      # menuSubItem("Dashboard Movie", 
-      #             tabName = "dash_movie"
-      #             #icon = icon("video")
-      # ),
+      menuItem("Distribution",
+                  tabName = "dstb",
+                  icon = icon("fa-duotone fa-route")
+      ),
+      menuItem("Country",
+               tabName = "ctr",
+               icon = icon("fa-duotone fa-earth-americas")),
       menuItem("Data", 
                tabName = "tab_data", 
                icon = icon("table")),
-      
       menuItem("Source Code", icon = icon("display"), 
                href = "https://github.com/KevinAlfandara/Capstone2"))
                # badgeLabel = "New",
@@ -64,7 +66,7 @@ dashboardPage(
                         color = "black"),
                 infoBox("Total Country", 
                         length(unique(netflix$country)),
-                        icon = icon("location"),
+                        icon = icon("fa-duotone fa-earth-americas"),
                         color = "red")
               ),
               
@@ -80,56 +82,76 @@ dashboardPage(
               ),
               
               #ROW 3 -> plot
-              fluidRow(
-                box(width = 12,
-                    plotlyOutput(outputId = "plot_bar")
-                    
-                )
-              )
-      ),
-      #sub item movie
-      # tabItem(tabName = "dash_movie",
       #         fluidRow(
-      #           box(width = 12,
-      #               plotlyOutput(outputId = "movie1")
-      #           )
-      #           #   box(sliderInput("tv1",
-      #           #                   "Slider input:",
-      #           #                   1, 1000, 50))
-      #         )
-      # ),
+      #           box(
+      #             background = "olive",
+      #             width = 12,
+      #             br(),
+      #             sliderInput("release_year",
+      #                         "Select Range:",
+      #                         min = 1925,
+      #                         max = 2021,
+      #                         value = c(1925,max(2021)),
+      #                         step= 1,
+      #                         round = FALSE,
+      #                         tick = FALSE
+      #             )),
+      #           ),
+      #             box(width = 12,
+      #               plotlyOutput(outputId = "plot_scatterplot"
+      #                            ))
+      ),
       
-      #sub item tv show
-      #tabItem(tabName = "dash_tvshow",
-              # fluidRow(
-              #   box(width = 12,
-              #       plotlyOutput(outputId = "tvshow1")
-              #       
-              #   )
-              # ),
-              # fluidRow(
-              #   box(width = 12,
-              #       plotlyOutput(outputId = "tvshow2"))
-              # ),
-              # fluidRow(
-              #   box(width = 12,
-              #       plotlyOutput(outputId = "tvshow3"))
-              #)
-              # fluidRow(
-              #   box(width = 12,
-              #       plotlyOutput(outputId = "tvshow4"))
-              # )
-              
-      #),
+      #PAGE 2
+      tabItem(tabName = "dstb",
+              fluidRow(
+                box(
+                  background = "olive",
+                  br(),
+                  sliderInput("release_year",
+                              "Select Range:",
+                              min = 1925,
+                              max = 2021,
+                              value = c(1925,max(2021)),
+                              step= 1,
+                              round = FALSE,
+                              tick = FALSE
+
+                  )),
+
+              ),
+
+              box(width = 12,
+                  plotlyOutput(outputId = "plot_scatterplot"))
+
+      ),
+      #page 3
+      tabItem(tabName = "ctr",
+              fluidRow(
+                box(width = 12,selectInput(
+                  inputId = "yearbetween",
+                  label = "Choose Year",
+                  choices = sort(unique(type_tvshow$release_year)),
+                  selected = "2019"),
+                  box(width = 12,
+                      plotlyOutput(outputId = "ct1"))
+              )
+      )),
       
-      # PAGE 2
-      # tabItem(tabName = "tab_channel",
-      #         h1("Halaman 2")
-              
-      # ),
-      
-      # PAGE 3
+      # PAGE 4
       tabItem(tabName = "tab_data",
+              markdown(
+                "
+                # Data Set Netflix Movies and TV Shows
+                source : https://www.kaggle.com/datasets/shivamb/netflix-shows/code?datasetId=434238&sortBy=commentCount&language=R&outputs=Visualization
+                # About Data Set
+                Netflix is one of the most popular media and video streaming platforms. They have over 8000 movies or tv shows available on their platform, as of mid-2021, they have over 200M Subscribers globally. This tabular dataset consists of listings of all the movies and tv shows available on Netflix, along with details such as - cast, directors, ratings, release year, duration, etc.
+                
+                + Resource Type :	Dataset
+                + License	: CC0: Public Domain
+                + Owner : Shivam Bansal
+                "
+              ),
               fluidRow(
                 box(width = 12,
                     DT::dataTableOutput("table1"))
